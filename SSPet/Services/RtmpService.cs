@@ -5,8 +5,8 @@ namespace SSPet.Services
 {
     public interface IRtmpService
     {
-        void Start();
-        void Stop();
+        string Start(int id);
+        string Stop(int id);
     }
 
     public class RtmpService : IRtmpService
@@ -20,18 +20,32 @@ namespace SSPet.Services
             _cache = cache;
         }
 
-        public void Start()
+        public string Start(int id)
         {
+            if (_cache.TryGetValue($"Stream{id}", out int cachedValue))
+            {
+                try
+                {
+                    Process checkFfmpeg = Process.GetProcessById(cachedValue);
+                    if (checkFfmpeg.ProcessName == "ffmpeg") return $"There is existing ffmpeg process on {id} key.";
+                    else _cache.Remove($"Stream{id}");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _cache.Remove($"Stream{id}");
+                }
+            }
             var ffmpegPath = "C:\\ffmpeg\\bin\\ffmpeg.exe";
-            var inputUrl = "rtmp://localhost:1935/live/stream"; // OBS RTMP output URL
-            var outputUrl = "D:\\Programming\\SSPetLocalStorage\\Test\\output.mp4"; // Destination file or processing endpoint
+            var inputUrl = $"rtmp://localhost:1935/live/stream/{id}";
+            var outputTsUrl = $"D:\\Programming\\SSPetLocalStorage\\{id}\\output_%03d.ts";
+            var outputManifestUrl = $"D:\\Programming\\SSPetLocalStorage\\{id}\\output.m3u8"; 
 
             _ffmpegProcess = new Process
             {
                 StartInfo =
             {
                 FileName = ffmpegPath,
-                Arguments = $"-listen 1 -i rtmp://localhost:1935/live/stream -c:v copy -c:a copy -f hls -hls_time 5 -hls_list_size 0 -hls_segment_filename D:\\Programming\\SSPetLocalStorage\\Test\\output_%03d.ts  D:\\Programming\\SSPetLocalStorage\\Test\\output.m3u8",
+                Arguments = $"-listen 1 -i {inputUrl} -c:v copy -c:a copy -f hls -hls_time 5 -hls_list_size 0 -hls_segment_filename {outputTsUrl}  {outputManifestUrl}",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -40,16 +54,22 @@ namespace SSPet.Services
 
 
             _ffmpegProcess.Start();
-            _cache.Set("Stream1", _ffmpegProcess.Id);
+            _cache.Set($"Stream{id}", _ffmpegProcess.Id);
+            return $"Stream successfuly started on {id} key. Use this url for connection: {inputUrl}";
         }
 
-        public void Stop()
+        public string Stop(int id)
         {
             int idToKill = -1;
-            if (_cache.TryGetValue("Stream1", out int cachedValue)) idToKill = cachedValue;
-            Process streamToKill = Process.GetProcessById(idToKill);
-            streamToKill.Kill();
-            _cache.Remove("Stream1");
+            if (_cache.TryGetValue($"Stream{id}", out int cachedValue))
+            {
+                idToKill = cachedValue;
+                Process streamToKill = Process.GetProcessById(idToKill);
+                streamToKill.Kill();
+                _cache.Remove($"Stream{id}");
+                return $"Stream successfully stopped on {id} key";
+            }
+            else return $"Stopping stream on {id} key failed, there is no PID saved in cache";
         }
     }
 }

@@ -14,16 +14,16 @@ public class StreamController : ControllerBase
     }
 
     [HttpPost("start")]
-    public IActionResult StartStreaming()
+    public IActionResult StartStreaming(int id)
     {
-        _rtmpService.Start();
-        return Ok("Streaming started.");
+        string result =_rtmpService.Start(id);
+        return Ok(result);
     }
 
     [HttpPost("stop")]
-    public IActionResult StopStreaming()
+    public IActionResult StopStreaming(int id)
     {
-        _rtmpService.Stop();
-        return Ok("Streaming stopped.");
+        string result = _rtmpService.Stop(id);
+        return Ok(result);
     }
 }
