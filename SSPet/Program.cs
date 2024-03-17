@@ -50,7 +50,7 @@ namespace SSPet
 
             app.MapRazorPages();
 
-            app.Run();
+            app.Run(); //chgecking
         }
     }
 }
