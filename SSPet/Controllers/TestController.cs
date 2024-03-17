@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using SSPet.Services;
 using System.IO;
 
@@ -12,7 +13,6 @@ public class StreamController : ControllerBase
     {
         _rtmpService = rtmpService;
     }
-
     [HttpPost("start")]
     public IActionResult StartStreaming(int id)
     {

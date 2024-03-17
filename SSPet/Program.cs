@@ -8,6 +8,8 @@ namespace SSPet
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors();
+
             builder.Services.AddControllers();
 
             // Add services to the container.
@@ -31,6 +33,11 @@ namespace SSPet
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseCors(options =>
+            {
+                options.WithOrigins("https://127.0.0.1:4200/").AllowAnyMethod().AllowAnyHeader();
+            });
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
@@ -39,6 +46,7 @@ namespace SSPet
             });
 
             app.UseAuthorization();
+
 
             app.MapRazorPages();
 
