@@ -8,3 +8,19 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+<form method="post" asp-page-handler="StartStreaming">
+    <input asp-for="Id" />
+    <button type="submit">Start Streaming</button>
+</form>
+<form method="post" asp-page-handler="StopStreaming">
+    <input asp-for="Id" />
+    <button type="submit">Stop Streaming</button>
+</form>
+
+@if (Model.Result != null)
+{
+    <div>
+        <h3>Result:</h3>
+        <pre>@Model.Result</pre>
+    </div>
+}

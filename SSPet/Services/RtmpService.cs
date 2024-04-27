@@ -1,75 +1,63 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Caching.Memory;
+using SSPet.Services.Interfaces;
 
 namespace SSPet.Services
 {
-    public interface IRtmpService
-    {
-        string Start(int id);
-        string Stop(int id);
-    }
 
     public class RtmpService : IRtmpService
     {
-        private Process? _ffmpegProcess;
 
         private readonly IMemoryCache _cache;
+        private readonly IFfmpegProcessService _ffmpegProcessService;
+        private readonly IConfiguration _configuration;
 
-        public RtmpService(IMemoryCache cache)
+        public RtmpService(IMemoryCache cache, IFfmpegProcessService ffmpegProcessService, IConfiguration configuration)
         {
             _cache = cache;
+            _ffmpegProcessService = ffmpegProcessService;
+            _configuration = configuration;
         }
 
-        public string Start(int id)
+        public async Task<string> StartAsync()
         {
-            if (_cache.TryGetValue($"Stream{id}", out int cachedValue))
+            if (_cache.TryGetValue("Stream", out int cachedValue))
             {
-                try
+                if (_ffmpegProcessService.CheckFfmpegProcess(cachedValue))
                 {
-                    Process checkFfmpeg = Process.GetProcessById(cachedValue);
-                    if (checkFfmpeg.ProcessName == "ffmpeg") return $"There is existing ffmpeg process on {id} key.";
-                    else _cache.Remove($"Stream{id}");
+                    return "Stream on this id is already launched";
                 }
-                catch (InvalidOperationException ex)
-                {
-                    _cache.Remove($"Stream{id}");
-                }
+                else _cache.Remove("Stream");
             }
-            var ffmpegPath = "C:\\ffmpeg\\bin\\ffmpeg.exe";
-            var inputUrl = $"rtmp://localhost:1935/live/stream/{id}";
-            var outputTsUrl = $"D:\\Programming\\SSPetLocalStorage\\{id}\\output_%03d.ts";
-            var outputManifestUrl = $"D:\\Programming\\SSPetLocalStorage\\{id}\\output.m3u8"; 
+            int processId = await _ffmpegProcessService.FfmpegStartAsync(); //Using FfmpegStart service
 
-            _ffmpegProcess = new Process
-            {
-                StartInfo =
-            {
-                FileName = ffmpegPath,
-                Arguments = $"-listen 1 -i {inputUrl} -c:v copy -c:a copy -f hls -hls_time 5 -hls_list_size 0 -hls_segment_filename {outputTsUrl}  {outputManifestUrl}",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-            };
-
-
-            _ffmpegProcess.Start();
-            _cache.Set($"Stream{id}", _ffmpegProcess.Id);
-            return $"Stream successfuly started on {id} key. Use this url for connection: {inputUrl}";
+            _cache.Set("Stream", processId);
+            return $"Stream successfuly started on 1 key. Use that key for connection.";
         }
 
-        public string Stop(int id)
+        public async Task<string> StopAsync()
         {
-            int idToKill = -1;
-            if (_cache.TryGetValue($"Stream{id}", out int cachedValue))
+            string path = _configuration["FilesDirectory"];
+            System.IO.DirectoryInfo di = new DirectoryInfo(path);
+            foreach (FileInfo file in di.GetFiles())
             {
-                idToKill = cachedValue;
-                Process streamToKill = Process.GetProcessById(idToKill);
-                streamToKill.Kill();
-                _cache.Remove($"Stream{id}");
-                return $"Stream successfully stopped on {id} key";
+                file.Delete();
             }
-            else return $"Stopping stream on {id} key failed, there is no PID saved in cache";
+            if (_cache.TryGetValue("Stream", out int cachedValue))
+            {
+                string response;
+                if (await _ffmpegProcessService.FfmpegStopAsync(cachedValue))
+                {
+                    response = $"Stream successfully stopped on 1 key";
+                }
+                else
+                {
+                    response = $"Process saved in cache is not ffmpeg, check process with PID: {cachedValue}";
+                }
+                _cache.Remove("Stream");
+                return response;
+            }
+            else return $"Stopping stream on 1 key is failed, there is no PID saved in cache";
         }
     }
 }

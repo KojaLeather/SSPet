@@ -1,4 +1,6 @@
 using SSPet.Services;
+using SSPet.Models;
+using SSPet.Services.Interfaces;
 
 namespace SSPet
 {
@@ -16,8 +18,19 @@ namespace SSPet
             builder.Services.AddRazorPages();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IRtmpService, RtmpService>();
+            builder.Services.AddTransient<IFfmpegProcessService, FfmpegProcessService>();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowVueApp", builder =>
+                {
+                    builder.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader();
+                });
+            });
 
             var app = builder.Build();
+
+            app.UseCors("AllowVueApp");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -45,12 +58,12 @@ namespace SSPet
                 endpoints.MapControllers();
             });
 
-            app.UseAuthorization();
 
 
             app.MapRazorPages();
 
-            app.Run(); //chgecking
+
+            app.Run();
         }
     }
 }

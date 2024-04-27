@@ -5,8 +5,6 @@ VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSPet", "SSPet\SSPet.csproj", "{D6162FE2-A3F2-4470-A18E-855C4315EEAE}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "SSPetAng", "SSPetAng\SSPetAng.esproj", "{D0BCC593-423F-4D71-9E6A-73D294A176B8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,12 +15,6 @@ Global
 		{D6162FE2-A3F2-4470-A18E-855C4315EEAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6162FE2-A3F2-4470-A18E-855C4315EEAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6162FE2-A3F2-4470-A18E-855C4315EEAE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0BCC593-423F-4D71-9E6A-73D294A176B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0BCC593-423F-4D71-9E6A-73D294A176B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0BCC593-423F-4D71-9E6A-73D294A176B8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{D0BCC593-423F-4D71-9E6A-73D294A176B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0BCC593-423F-4D71-9E6A-73D294A176B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0BCC593-423F-4D71-9E6A-73D294A176B8}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
